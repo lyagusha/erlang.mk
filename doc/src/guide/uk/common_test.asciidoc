@@ -1,0 +1,91 @@
+[[ct]]
+== Common Test
+
+Common Test - фреймворк для тестування Erlang додатків.
+Erlang.mk автоматизує пошук та виконання наборів тестів
+
+=== Написання тестів
+
+http://www.erlang.org/doc/apps/common_test/write_test_chapter.html[Керівництво користувача Common Test]
+це найкращій матеріал про написання тестів. Erlang.mk вимагає, 
+щоб тестові модулі мали назви '_SUITE.erl' та були розташовані 
+у '$(TEST_DIR)'. За замовчуванням це тека 'test/'.
+
+=== Конфігурація
+
+Змінна `CT_OPTS` дає можливість встановлення додатковіх опцій 
+Common Test. Опції описані у http://www.erlang.org/doc/apps/common_test/run_test_chapter.html[керівництві користувача]. Наприклад, ви можете використовувати її для 
+встановлення Common Test hooks:
+
+[source,make]
+CT_OPTS = -ct_hooks cowboy_ct_hook
+
+Змінна `CT_SUITES` містить набори тестів Common Test. Зазвичай
+немає потреби в її визначенні, оскільки Erlang.mk самостійно
+знаходить тести.
+
+Назва набору це частина імені файлу перед `_SUITE.erl`.
+Якщо ім'я файлу 'http_SUITE.erl', назва набору тестів `http`:
+
+[source,make]
+CT_SUITES = http ws
+
+Змінна `CT_LOGS_DIR` визначає теку, в яку будуть записані файли 
+HTML-журналу під час виконання тестів. За замовчуванням це 'logs/'.
+
+[source,make]
+CT_LOGS_DIR = ct_output_log_dir
+
+=== Використання
+
+Для запуску всіх тестів (включаючи Common Test):
+
+[source,bash]
+$ make tests
+
+Для запуску всіх тестів та статичних перевірок (включаючи Common Test):
+
+[source,bash]
+$ make check
+
+Для запуску Common Test:
+
+[source,bash]
+$ make ct
+
+Erlang.mk виконуватиме всі тести які будуть знайдені.
+Якщо у вас є набір тестів 'test/http_SUITE.erl', ви маєте
+можливість виконати лише його скориставшись командою `ct-http`:
+
+[source,bash]
+$ make ct-http
+
+Erlang.mk також надає можливість виконання окремої группи, або
+навіть оремого тесту через використання опції `t`. Зверніть увагу,
+це діє лише з цільовими об'єктами як у прикладі вище з `ct-http`.
+
+Для виконання всіх тестів гуппи `http_compress` з набору тестів
+`http_SUITE` виконайте наступне:
+
+[source,bash]
+$ make ct-http t=http_compress
+
+Так само для виконання окремого тесту з цієї группи:
+
+[source,bash]
+$ make ct-http t=http_compress:headers_dupe
+
+Те саме можна виконати в репозиторії з декількома додатками 
+(multi-application repository) використовуючи опцію `-C`:
+
+[source,bash]
+$ make -C apps/my_app ct-http t=my_group:my_case
+
+Зверніть увагу, це такоз працює з залежностями. При використанні 
+Cowboy в якості залежності, ви можете виконати наступне:
+
+[source,bash]
+$ make -C deps/cowboy ct-http t=http_compress
+
+Також є можливість дізнатися ступень xref:coverage[покриття коду] тестами,
+про це піде мова в окремій главі.
